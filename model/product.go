@@ -24,10 +24,12 @@ type SortFilter struct {
 
 type ProductUsecase interface {
 	GetAllProducts(ctx context.Context, sortFilter *SortFilter) ([]*Product, error)
+	FindByID(ctx context.Context, id int64) (*Product, error)
 }
 
 type ProductRepository interface {
 	GetAllProducts(ctx context.Context, sortFilter *SortFilter) ([]*Product, error)
+	FindByID(ctx context.Context, id int64) (*Product, error)
 }
 
 type ProductSortType string
