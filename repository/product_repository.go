@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/zipzap11/pharm-API/model"
@@ -33,4 +34,17 @@ func (r *productRepositoryImpl) GetAllProducts(ctx context.Context, sortFilter *
 		return nil, err
 	}
 	return result, nil
+}
+
+func (r *productRepositoryImpl) FindByID(ctx context.Context, id int64) (*model.Product, error) {
+	var result model.Product
+	err := r.db.First(&result, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		logrus.WithField("id", id).Error(err)
+		return nil, err
+	}
+	return &result, nil
 }
