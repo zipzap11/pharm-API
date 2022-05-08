@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -44,6 +45,31 @@ func (pc *ProductController) GetAllProducts(c echo.Context) error {
 	})
 	if err != nil {
 		logrus.Error(err)
+		return c.JSON(GetErrorCode(err), resp.ErrResponse{
+			Message: err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, resp.StdResponse{
+		Message: "ok",
+		Data:    result,
+	})
+}
+
+func (pc *ProductController) FindById(c echo.Context) error {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	log := logrus.WithField("id", id)
+	if err != nil {
+		log.Error(err)
+		return c.JSON(http.StatusBadRequest, resp.ErrResponse{
+			Message: "invalid id",
+		})
+	}
+
+	result, err := pc.productUsecase.FindByID(c.Request().Context(), int64(id))
+	if err != nil {
+		log.Error(err)
 		return c.JSON(GetErrorCode(err), resp.ErrResponse{
 			Message: err.Error(),
 		})
