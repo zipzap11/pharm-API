@@ -18,11 +18,17 @@ func main() {
 	productUsecase := usecase.NewProductUsecase(productRepository)
 	productController := controller.NewProductController(productUsecase)
 
+	categoryRepository := repository.NewCategoryRepository(db.DB)
+	categoryUsecase := usecase.NewCategoryUsecase(categoryRepository)
+	categoryController := controller.NewCategoryController(categoryUsecase)
+
 	// middleware
 	e.Use(middleware.Logger())
 
 	// path
 	e.GET("/products", productController.GetAllProducts)
+	e.GET("/products/:id", productController.FindById)
+	e.GET("/categories", categoryController.GetAllCategories)
 
 	e.Start("localhost:8000")
 }
