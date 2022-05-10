@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -41,4 +43,16 @@ func GetDBPassword() string {
 
 func GetDBUser() string {
 	return viper.GetString("postgres.user")
+}
+
+func GetRefreshTokenDuration() time.Duration {
+	return viper.GetDuration("session.refresh_token_duration")
+}
+
+func GetAccessTokenDuration() time.Duration {
+	return viper.GetDuration("session.access_token_duration")
+}
+
+func GetSymmetricKey() string {
+	return viper.GetString("session.symmetric_key")
 }
