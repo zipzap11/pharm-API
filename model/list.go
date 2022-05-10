@@ -11,5 +11,6 @@ func ModelList() []interface{} {
 		Transaction{},
 		TransactionItem{},
 		User{},
+		Session{},
 	}
 }
