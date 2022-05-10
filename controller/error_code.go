@@ -10,6 +10,13 @@ func GetErrorCode(err error) int {
 	switch err {
 	case usecase.ErrNotFound:
 		return http.StatusNotFound
+	case usecase.ErrBlockedSession,
+		usecase.ErrIncorrectUserToken,
+		usecase.ErrMissmatchedToken:
+		return http.StatusUnauthorized
+	case usecase.ErrInvalidCredential,
+		usecase.ErrInvalidEmail:
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}
