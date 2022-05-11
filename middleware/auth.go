@@ -7,12 +7,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	ctrl "github.com/zipzap11/pharm-API/controller"
+	"github.com/zipzap11/pharm-API/model"
 	"github.com/zipzap11/pharm-API/util"
 )
 
 const (
 	authorizationTypeBearer = "bearer"
-	authorizationPayloadKey = "authorization_payload"
 )
 
 var (
@@ -44,7 +44,7 @@ func AuthPaseto(tokenProvider util.TokenProvider) echo.MiddlewareFunc {
 				return ctrl.ErrResponseWithCode(c, err, http.StatusUnauthorized)
 			}
 
-			c.Set(authorizationPayloadKey, payload)
+			c.Set(model.AuthorizationPayloadKey, payload)
 
 			return next(c)
 		}
