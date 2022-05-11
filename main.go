@@ -44,6 +44,14 @@ func main() {
 	userUsecase := usecase.NewUserUsecase(userRepository, validator, tokenProvider, sessionRepository)
 	userController := controller.NewUserController(userUsecase)
 
+	// cart-item
+	cartItemRepository := repository.NewCartItemRepository(db.DB)
+
+	// cart
+	cartRepository := repository.NewCartRepository(db.DB, cartItemRepository)
+	cartUsecase := usecase.NewCartUsecase(cartRepository)
+	cartController := controller.NewCartController(cartUsecase)
+
 	// middleware
 	e.Use(middleware.Logger())
 	auth := e.Group("", customMiddleware.AuthPaseto(tokenProvider))
@@ -55,5 +63,6 @@ func main() {
 	e.POST("/users", userController.CreateUser)
 	e.POST("/auth/login", userController.Login)
 	e.POST("/auth/refresh", sessionController.RefreshSession)
+	auth.GET("/carts", cartController.FindCart)
 	e.Start("localhost:8000")
 }
