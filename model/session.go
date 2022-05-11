@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
+const AuthorizationPayloadKey = "authorization_payload"
+
 type Session struct {
 	ID           uuid.UUID
 	RefreshToken string
