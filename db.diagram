@@ -1,0 +1,76 @@
+Table categories {
+  id int [pk, increment]
+  name varchar
+}
+Table products {
+  id int [pk, increment]
+  category_id int [ref: > categories.id]
+  name varchar
+  price bigint
+  weight bigint
+  description string
+}
+Enum transaction_status {
+  PAID
+  PENDING
+  EXPIRED
+}
+Table transactions {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+  status transaction_status
+  payment_method_id int [ref: > payment_methods.id]
+  shipping_id int [ref: < shipping.id]
+  price bigint
+  payment_url varchar
+  created_at timestamp
+  updated_at timestamp
+}
+Table transaction_items {
+  transaction_id int [ref: > transactions.id]
+  product_id int [ref: > products.id]
+  quantity int
+}
+Table payment_methods {
+  id int [pk, increment]
+  name varchar
+}
+Table address {
+  id int [pk, increment]
+  name string
+  user_id int
+  province_id varchar [ref: > provinces.id]
+  state_id varchar [ref: > states.id]
+  postal_code varchar
+  address_detail text
+}
+Table users {
+  id int [pk, increment]
+  name varchar
+  email varchar
+  password varchar
+  phone varchar
+}
+Table carts {
+  id int [pk, increment]
+  user_id int [ref: - users.id]
+}
+Table cart_items {
+  quantity int
+  product_id int [ref: > products.id]
+  cart_id int [ref: > carts.id]
+}
+Table provinces {
+  id varchar [pk]
+  name varchar
+}
+Table states {
+  id varchar [pk]
+  name varchar
+}
+Table shipping {
+  id int [pk, increment]
+  price int
+  address_id int [ref: < address.id]
+	AddressID       int64
+}

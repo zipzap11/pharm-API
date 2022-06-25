@@ -28,6 +28,6 @@ func (cc *categoryController) GetAllCategories(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, resp.StdResponse{
 		Message: "ok",
-		Data:    result,
+		Data:    resp.ModelToCategoryResponseArray(result),
 	})
 }

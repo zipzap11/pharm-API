@@ -26,3 +26,32 @@ func ModelFromCreateUserRequest(req *CreateUserRequest) *model.User {
 type RefreshSessionRequest struct {
 	RefreshToken string `json:"refresh_token"`
 }
+
+type UpdateItemQuantityRequest struct {
+	ItemID   int64  `json:"item_id"`
+	Type     string `json:"type"`
+	Quantity int64  `json:"quantity"`
+}
+
+type CreateAddressRequest struct {
+	Name          string `json:"name"`
+	StateID       string `json:"state_id"`
+	ProvinceID    string `json:"province_id"`
+	AddressDetail string `json:"address_detail"`
+	PostalCode    string `json:"postal_code"`
+}
+
+func ModelfromCreateAddressRequest(req *CreateAddressRequest) *model.Address {
+	return &model.Address{
+		Name:          req.Name,
+		ProvinceID:    req.ProvinceID,
+		StateID:       req.StateID,
+		PostalCode:    req.PostalCode,
+		AddressDetail: req.AddressDetail,
+	}
+}
+
+type CreateTransactionRequest struct {
+	AddressID        int64  `json:"address_id"`
+	ShippingServices string `json:"shipping_services"`
+}

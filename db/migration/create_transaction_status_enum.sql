@@ -1,1 +1,0 @@
-CREATE TYPE "transaction_status" AS ENUM ('PAID', 'PENDING', 'EXPIRED')

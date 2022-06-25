@@ -1,0 +1,21 @@
+{
+    "currency":"IDR", 
+    "fraud_status":"accept",
+    "gross_amount":"490000.00", 
+    "merchant_id":"G265457723", 
+    "order_id":"15", 
+    "payment_amounts":[], 
+    "payment_type":"bank_transfer", 
+    "signature_key":"4e276ff69abb69b6af4d46fd511333233439bf7aea44372397ae2e9ba09cdcc5420d6bc23eebc6298368dbdfb3ffbe5177000d5e307f438fb4b0b2c0653a4d85", 
+    "status_code":201, 
+    "status_message":"midtrans payment notification", 
+    "transaction_id":"e796854e-d0f2-4701-896c-f7ba6a680015",
+    "transaction_status":"pending",
+    "transaction_time":"2022-05-22 12:04:49", 
+    "va_numbers":[
+        {
+            "bank":"bca",
+            "va_number":"57723574321"
+        }
+    ]
+}

@@ -76,3 +76,16 @@ func (u *SessionUsecaseImpl) RefreshSession(ctx context.Context, token string) (
 
 	return accessToken, refreshToken, nil
 }
+
+func (u *SessionUsecaseImpl) CheckSession(ctx context.Context, token string) error {
+	log := logrus.WithFields(logrus.Fields{
+		"ctx":   ctx,
+		"token": token,
+	})
+	_, err := u.tokenProvider.VerifyToken(token)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	return nil
+}

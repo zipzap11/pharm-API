@@ -2,7 +2,6 @@ package model
 
 func ModelList() []interface{} {
 	return []interface{}{
-		Address{},
 		CartItem{},
 		Cart{},
 		Category{},
@@ -12,5 +11,9 @@ func ModelList() []interface{} {
 		TransactionItem{},
 		User{},
 		Session{},
+		Shipping{},
+		Province{},
+		State{},
+		Address{},
 	}
 }

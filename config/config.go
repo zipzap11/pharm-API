@@ -11,6 +11,8 @@ func init() {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+	viper.AddConfigPath("../")
+	viper.AddConfigPath("../../")
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -55,4 +57,28 @@ func GetAccessTokenDuration() time.Duration {
 
 func GetSymmetricKey() string {
 	return viper.GetString("session.symmetric_key")
+}
+
+func GetProvinceAPIUrl() string {
+	return viper.GetString("rajaongkir.province")
+}
+
+func GetStateAPIUrl() string {
+	return viper.GetString("rajaongkir.state")
+}
+
+func GetROAPIKey() string {
+	return viper.GetString("rajaongkir.key")
+}
+
+func GetROPriceURL() string {
+	return viper.GetString("rajaongkir.price")
+}
+
+func GetShippingOrigin() string {
+	return viper.GetString("rajaongkir.origin")
+}
+
+func GetMidtransAPIKey() string {
+	return viper.GetString("midtrans.sandbox_apikey")
 }

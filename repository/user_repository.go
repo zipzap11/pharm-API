@@ -19,13 +19,13 @@ func NewUserRepository(db *gorm.DB) model.UserRepository {
 	}
 }
 
-func (r *UserRepositoryImpl) CreateUser(ctx context.Context, user *model.User) error {
-	err := r.db.Create(user).Error
+func (r *UserRepositoryImpl) CreateUser(ctx context.Context, tx *gorm.DB, user *model.User) (int64, error) {
+	err := tx.Create(user).Error
 	if err != nil {
 		logrus.WithField("user", user).Error(err)
-		return err
+		return 0, err
 	}
-	return nil
+	return int64(user.ID), nil
 }
 
 func (r *UserRepositoryImpl) FindUserByEmail(ctx context.Context, email string) (*model.User, error) {
@@ -38,4 +38,23 @@ func (r *UserRepositoryImpl) FindUserByEmail(ctx context.Context, email string) 
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (r *UserRepositoryImpl) FindUserByID(ctx context.Context, id int64) (*model.User, error) {
+	log := logrus.WithFields(logrus.Fields{
+		"ctx": ctx,
+		"id":  id,
+	})
+
+	var user *model.User
+	err := r.db.First(&user, id).Error
+	if err != nil {
+		if errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil, nil
+		}
+		log.Error(err)
+		return nil, err
+	}
+
+	return user, nil
 }

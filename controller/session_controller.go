@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/sirupsen/logrus"
@@ -40,4 +43,32 @@ func (sc *SessionController) RefreshSession(c echo.Context) error {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
+}
+
+func (sc *SessionController) CheckSession(c echo.Context) error {
+	ctx := c.Request().Context()
+	log := logrus.WithField("ctx", ctx)
+
+	bearer := c.Request().Header["Authorization"]
+	fmt.Println("bearer = ", bearer)
+	fmt.Println("len =", len(bearer))
+	if len(bearer) < 1 {
+		return ErrResponseWithCode(c, errors.New("token is required"), http.StatusBadRequest)
+	}
+	fields := strings.Fields(bearer[0])
+	if len(fields) < 2 {
+		return ErrResponseWithCode(c, errors.New("invalid token format"), http.StatusBadRequest)
+	}
+	if fields[0] != "bearer" {
+		return ErrResponseWithCode(c, errors.New("invalid token format"), http.StatusBadRequest)
+	}
+
+	headerToken := fields[1]
+	err := sc.sessionUsecase.CheckSession(ctx, headerToken)
+	if err != nil {
+		log.Error(err)
+		return ErrResponse(c, err)
+	}
+
+	return SuccessResponse(c, nil)
 }

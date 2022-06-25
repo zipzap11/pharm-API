@@ -1,0 +1,60 @@
+{
+    "transaction_details": {
+        "order_id": "3",
+        "gross_amount": 139700
+    },
+    "item_details": [
+        {
+            "id": "4",
+            "name": "Rhinos Junior Sirup 60 ml",
+            "price": 68700,
+            "quantity": 1
+        },
+        {
+            "id": "3",
+            "name": "Diatomix Pembasmi Kutu Pada Hewan Peliharaan \u0026 Ternak 25 g",
+            "price": 27500,
+            "quantity": 2
+        },
+        {
+            "id": "3",
+            "name": "Pengiriman via OKE",
+            "price": 16000,
+            "quantity": 1
+        }
+    ],
+    "customer_details": {
+        "first_name": "Tes",
+        "email": "Tes@gmail.com"
+    },
+    "transaction": {
+        "transaction_details": {
+            "order_id": "3",
+            "gross_amount": 139700
+        },
+        "item_details": [
+            {
+                "id": "4",
+                "name": "Rhinos Junior Sirup 60 ml",
+                "price": 68700,
+                "quantity": 1
+            },
+            {
+                "id": "3",
+                "name": "Diatomix Pembasmi Kutu Pada Hewan Peliharaan \u0026 Ternak 25 g",
+                "price": 27500,
+                "quantity": 2
+            },
+            {
+                "id": "3",
+                "name": "Pengiriman via OKE",
+                "price": 16000,
+                "quantity": 1
+            }
+        ],
+        "customer_details": {
+            "first_name": "Tes",
+            "email": "Tes@gmail.com"
+        }
+    }
+}

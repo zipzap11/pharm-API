@@ -8,6 +8,7 @@ import (
 	"github.com/zipzap11/pharm-API/config"
 	"github.com/zipzap11/pharm-API/model"
 	"github.com/zipzap11/pharm-API/util"
+	"gorm.io/gorm"
 )
 
 type userUsecaseImpl struct {
@@ -15,14 +16,18 @@ type userUsecaseImpl struct {
 	validator         *validator.Validate
 	tokenProvider     util.TokenProvider
 	sessionRepository model.SessionRepository
+	db                *gorm.DB
+	cartRepository    model.CartRepository
 }
 
-func NewUserUsecase(userRepository model.UserRepository, validator *validator.Validate, tokenProvider util.TokenProvider, sessionRepository model.SessionRepository) model.UserUsecase {
+func NewUserUsecase(userRepository model.UserRepository, validator *validator.Validate, tokenProvider util.TokenProvider, sessionRepository model.SessionRepository, db *gorm.DB, cartRepository model.CartRepository) model.UserUsecase {
 	return &userUsecaseImpl{
 		userRepository:    userRepository,
 		validator:         validator,
 		tokenProvider:     tokenProvider,
 		sessionRepository: sessionRepository,
+		db:                db,
+		cartRepository:    cartRepository,
 	}
 }
 
@@ -33,7 +38,6 @@ func (u *userUsecaseImpl) CreateUser(ctx context.Context, user *model.User) erro
 		log.Error(err)
 		return err
 	}
-
 	hashedPassword, err := util.HashPassword(user.Password)
 	if err != nil {
 		log.Error(err)
@@ -41,7 +45,23 @@ func (u *userUsecaseImpl) CreateUser(ctx context.Context, user *model.User) erro
 	}
 
 	user.Password = hashedPassword
-	err = u.userRepository.CreateUser(ctx, user)
+
+	tx := u.db.Begin()
+	userID, err := u.userRepository.CreateUser(ctx, tx, user)
+	if err != nil {
+		log.Error(err)
+		tx.Rollback()
+		return err
+	}
+
+	err = u.cartRepository.CreateCart(ctx, tx, userID)
+	if err != nil {
+		log.Error(err)
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit().Error
 	if err != nil {
 		log.Error(err)
 		return err
@@ -106,4 +126,20 @@ func (u *userUsecaseImpl) Login(ctx context.Context, email string, password stri
 	}
 
 	return accessToken, refreshToken, nil
+}
+
+func (u *userUsecaseImpl) FindByID(ctx context.Context, id int64) (*model.User, error) {
+	user, err := u.userRepository.FindUserByID(ctx, id)
+	switch {
+	case err != nil:
+		logrus.WithFields(logrus.Fields{
+			"ctx": ctx,
+			"id":  id,
+		}).Error(err)
+		return nil, err
+	case user == nil:
+		return nil, ErrNotFound
+	default:
+		return user, nil
+	}
 }

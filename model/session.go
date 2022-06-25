@@ -25,4 +25,5 @@ type SessionRepository interface {
 
 type SessionUsecase interface {
 	RefreshSession(ctx context.Context, token string) (string, string, error)
+	CheckSession(ctx context.Context, token string) error
 }

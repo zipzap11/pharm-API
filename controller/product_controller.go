@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -35,9 +36,7 @@ func (pc *ProductController) GetAllProducts(c echo.Context) error {
 			Message: "invalid sort type",
 		})
 	}
-
 	query := c.QueryParam("query")
-
 	result, err := pc.productUsecase.GetAllProducts(c.Request().Context(), &model.SortFilter{
 		CategoryID: int64(categoryID),
 		SortType:   sortType,
@@ -79,4 +78,25 @@ func (pc *ProductController) FindById(c echo.Context) error {
 		Message: "ok",
 		Data:    result,
 	})
+}
+
+func (pc *ProductController) Create(c echo.Context) error {
+	var (
+		ctx = c.Request().Context()
+		log = logrus.WithField("ctx", ctx)
+		body = &model.Product{}
+	)
+
+	if err := c.Bind(body); err != nil {
+		log.Error(err)
+		return ErrResponseWithCode(c, errors.New("invalid payload"), http.StatusBadRequest)
+	}
+
+	err := pc.productUsecase.CreateProduct(ctx, body)
+	if err != nil {
+		log.Error(err)
+		return ErrResponse(c, err)
+	}
+
+	return SuccessResponse(c, nil)
 }

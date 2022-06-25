@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -43,7 +44,7 @@ func AuthPaseto(tokenProvider util.TokenProvider) echo.MiddlewareFunc {
 			if err != nil {
 				return ctrl.ErrResponseWithCode(c, err, http.StatusUnauthorized)
 			}
-
+			fmt.Println("payload =", payload.ExpiredAt)
 			c.Set(model.AuthorizationPayloadKey, payload)
 
 			return next(c)
