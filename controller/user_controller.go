@@ -41,6 +41,23 @@ func (uc *UserController) CreateUser(c echo.Context) error {
 	return SuccessResponse(c, nil)
 }
 
+func (uc *UserController) CreateSuperUser(c echo.Context) error {
+	log := logrus.WithField("ctx", c.Request().Context())
+	var body request.CreateUserRequest
+	err := c.Bind(&body)
+	if err != nil {
+		log.Error(err)
+		return ErrResponseWithCode(c, err, http.StatusBadRequest)
+	}
+
+	err = uc.userUsecase.CreateSuperUser(c.Request().Context(), request.ModelFromCreateUserRequest(&body))
+	if err != nil {
+		return echo.NewHTTPError(echo.ErrBadRequest.Code, err.Error())
+	}
+
+	return SuccessResponse(c, nil)
+}
+
 func (uc *UserController) Login(c echo.Context) error {
 	log := logrus.WithField("ctx", c.Request().Context())
 
@@ -82,4 +99,28 @@ func (uc *UserController) FindCurrentUser(c echo.Context) error {
 	}
 
 	return SuccessResponse(c, res)
+}
+
+func (uc *UserController) FindUsers(c echo.Context) error {
+	var (
+		ctx = c.Request().Context()
+		log = logrus.WithField("ctx", ctx)
+	)
+
+	payload, ok := c.Get(model.AuthorizationPayloadKey).(*util.Payload)
+	if !ok {
+		return ErrResponseWithCode(c, errors.New("internal server error"), http.StatusInternalServerError)
+	}
+
+	if payload.Role == int(model.RoleUser) {
+		return ErrResponseWithCode(c, errors.New("permission denied"), http.StatusForbidden)
+	}
+
+	res, err := uc.userUsecase.FindAllUsers(ctx)
+	if err != nil {
+		log.Error(err)
+		return ErrResponse(c, err)
+	}
+
+	return SuccessResponse(c, resp.UserResponsesFromModel(res))
 }

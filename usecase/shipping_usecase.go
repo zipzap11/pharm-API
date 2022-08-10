@@ -42,7 +42,7 @@ func (u *shippingUsecaseImpl) GetShippingPackages(ctx context.Context, addressID
 	}
 
 	for _, v := range items {
-		log.Infof("item - %d weight = %v\n", v.ID,v.Product.Weight)
+		log.Infof("item - %d weight = %v\n", v.ID, v.Product.Weight)
 	}
 
 	address, err := u.addressRepository.GetAddressByID(ctx, addressID)
@@ -113,4 +113,22 @@ func (u *shippingUsecaseImpl) countItemsWeight(items []*model.CartItem) float64 
 		weight += (v.Product.Weight * float64(v.Quantity))
 	}
 	return weight
+}
+
+func (u *shippingUsecaseImpl) FindByID(ctx context.Context, id int64) (*model.Shipping, error) {
+	log := logrus.WithFields(logrus.Fields{
+		"ctx": ctx,
+		"id":  id,
+	})
+
+	shipping, err := u.shippingRepository.FindByID(ctx, id)
+	switch err {
+	case nil:
+		return shipping, nil
+	case gorm.ErrRecordNotFound:
+		return nil, nil
+	default:
+		log.Error(err)
+		return nil, err
+	}
 }

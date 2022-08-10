@@ -126,11 +126,72 @@ func (tc *TransactionController) GetTransactionByUserID(c echo.Context) error {
 		return ErrResponseWithCode(c, errors.New("internal server error"), http.StatusInternalServerError)
 	}
 
-	res, err := tc.transactionUsecase.GetTransactionByUserID(ctx, payload.UserID)
+	var (
+		res []*model.Transaction
+		err error
+	)
+	switch payload.Role {
+	case int(model.RoleAdmin):
+		res, err = tc.transactionUsecase.FindAllTransactions(ctx)
+	case int(model.RoleUser):
+		res, err = tc.transactionUsecase.GetTransactionByUserID(ctx, payload.UserID)
+	default:
+		return ErrResponseWithCode(c, errors.New("invalid credentials"), http.StatusUnauthorized)
+	}
 	if err != nil {
 		log.Error(err)
 		return ErrResponse(c, err)
 	}
 
 	return SuccessResponse(c, model.ToTransactionResponses(res))
+}
+
+func (tc *TransactionController) FindAllTransactions(c echo.Context) error {
+	var (
+		ctx = c.Request().Context()
+		log = logrus.WithField("ctx", ctx)
+	)
+
+	payload, ok := c.Get(model.AuthorizationPayloadKey).(*util.Payload)
+	if !ok {
+		return ErrResponseWithCode(c, errors.New("internal server error"), http.StatusInternalServerError)
+	}
+
+	if payload.Role == int(model.RoleUser) {
+		return ErrResponseWithCode(c, errors.New("permission denied"), http.StatusForbidden)
+	}
+
+	res, err := tc.transactionUsecase.FindAllTransactions(ctx)
+	if err != nil {
+		log.Error(err)
+		return ErrResponse(c, err)
+	}
+
+	return SuccessResponse(c, res)
+}
+
+func (tc *TransactionController) GetTransactionByID(c echo.Context) error {
+	var (
+		ctx     = c.Request().Context()
+		log     = logrus.WithField("ctx", ctx)
+		idParam = c.Param("id")
+		id, err = strconv.ParseInt(idParam, 10, 64)
+	)
+	if err != nil {
+		log.Error(err)
+		return ErrResponseWithCode(c, errors.New("bad id request"), http.StatusBadRequest)
+	}
+
+	payload, ok := c.Get(model.AuthorizationPayloadKey).(*util.Payload)
+	if !ok {
+		return ErrResponseWithCode(c, errors.New("internal server error"), http.StatusInternalServerError)
+	}
+
+	res, err := tc.transactionUsecase.FindByID(ctx, id, payload.UserID)
+	if err != nil {
+		log.Error(err)
+		return ErrResponse(c, err)
+	}
+
+	return SuccessResponse(c, res)
 }

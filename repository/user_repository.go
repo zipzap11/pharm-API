@@ -58,3 +58,32 @@ func (r *UserRepositoryImpl) FindUserByID(ctx context.Context, id int64) (*model
 
 	return user, nil
 }
+
+func (r *UserRepositoryImpl) FindAll(ctx context.Context) ([]*model.User, error) {
+	log := logrus.WithField("ctx", ctx)
+
+	var users []*model.User
+	if err := r.db.Find(&users).Error; err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (r *UserRepositoryImpl) FindByID(ctx context.Context, id int64) (*model.User, error) {
+	log := logrus.WithFields(logrus.Fields{
+		"ctx": ctx,
+		"id": id,
+	})
+	var user model.User
+	if err := r.db.First(&user, id).Error; err != nil {
+		if errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil, nil
+		}
+		log.Error(err)
+		return nil, err
+	}
+
+	return &user, nil
+}

@@ -232,3 +232,51 @@ func (u *transactionUsecaseImpl) GetTransactionByUserID(ctx context.Context, use
 
 	return transactions, nil
 }
+
+func (u *transactionUsecaseImpl) FindAllTransactions(ctx context.Context) ([]*model.Transaction, error) {
+	log := logrus.WithField("ctx", ctx)
+
+	trans, err := u.transactionRepository.FindAll(ctx)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return trans, nil
+}
+
+func (u *transactionUsecaseImpl) FindByID(ctx context.Context, id int64, userID int64) (*model.Transaction, error) {
+	log := logrus.WithFields(logrus.Fields{
+		"ctx":    ctx,
+		"id":     id,
+		"userID": userID,
+	})
+
+	user, err := u.userRepository.FindByID(ctx, userID)
+	switch {
+	case err != nil:
+		log.Error(err)
+		return nil, err
+	case user == nil:
+		return nil, ErrNotFound
+	}
+
+	trans, err := u.transactionRepository.FindByID(ctx, id)
+	switch {
+	case err != nil:
+		log.Error(err)
+		return nil, err
+	case trans == nil:
+		return nil, ErrNotFound
+	case trans.UserID != userID && user.Role != model.RoleAdmin:
+		return nil, ErrPermissionDenied
+	}
+
+	shipping, err := u.shippingUsecase.FindByID(ctx, trans.ShippingID)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	trans.Shipping = shipping
+
+	return trans, nil
+}

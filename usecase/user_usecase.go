@@ -38,6 +38,16 @@ func (u *userUsecaseImpl) CreateUser(ctx context.Context, user *model.User) erro
 		log.Error(err)
 		return err
 	}
+
+	usr, err := u.userRepository.FindUserByEmail(ctx, user.Email)
+	switch {
+	case err != nil:
+		log.Error(err)
+		return err
+	case usr != nil:
+		return ErrEmailAlreadyUsed
+	}
+
 	hashedPassword, err := util.HashPassword(user.Password)
 	if err != nil {
 		log.Error(err)
@@ -45,6 +55,7 @@ func (u *userUsecaseImpl) CreateUser(ctx context.Context, user *model.User) erro
 	}
 
 	user.Password = hashedPassword
+	user.Role = model.RoleUser
 
 	tx := u.db.Begin()
 	userID, err := u.userRepository.CreateUser(ctx, tx, user)
@@ -102,13 +113,14 @@ func (u *userUsecaseImpl) Login(ctx context.Context, email string, password stri
 		return "", "", ErrInvalidCredential
 	}
 
-	accessToken, _, err := u.tokenProvider.CreateToken(int64(user.ID), config.GetAccessTokenDuration())
+	log.Info("user role =", user.Role, " id =", user.ID)
+	accessToken, _, err := u.tokenProvider.CreateToken(int64(user.ID), int(user.Role), config.GetAccessTokenDuration())
 	if err != nil {
 		log.Error(err)
 		return "", "", err
 	}
 
-	refreshToken, refreshPayload, err := u.tokenProvider.CreateToken(int64(user.ID), config.GetRefreshTokenDuration())
+	refreshToken, refreshPayload, err := u.tokenProvider.CreateToken(int64(user.ID), int(user.Role), config.GetRefreshTokenDuration())
 	if err != nil {
 		log.Error(err)
 		return "", "", err
@@ -118,6 +130,7 @@ func (u *userUsecaseImpl) Login(ctx context.Context, email string, password stri
 		ID:           refreshPayload.ID,
 		RefreshToken: refreshToken,
 		UserID:       refreshPayload.UserID,
+		Role:         user.Role,
 		CreatedAt:    refreshPayload.CreatedAt,
 		ExpiredAt:    refreshPayload.ExpiredAt,
 	})
@@ -142,4 +155,56 @@ func (u *userUsecaseImpl) FindByID(ctx context.Context, id int64) (*model.User, 
 	default:
 		return user, nil
 	}
+}
+
+func (u *userUsecaseImpl) CreateSuperUser(ctx context.Context, user *model.User) error {
+	log := logrus.WithField("user", user)
+	err := u.validator.Struct(user)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	usr, err := u.userRepository.FindUserByEmail(ctx, user.Email)
+	switch {
+	case err != nil:
+		log.Error(err)
+		return err
+	case usr != nil:
+		return ErrEmailAlreadyUsed
+	}
+
+	hashedPassword, err := util.HashPassword(user.Password)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	user.Password = hashedPassword
+	user.Role = model.RoleAdmin
+
+	tx := u.db.Begin()
+	_, err = u.userRepository.CreateUser(ctx, tx, user)
+	if err != nil {
+		log.Error(err)
+		tx.Rollback()
+		return err
+	}
+	if err = tx.Commit().Error; err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return nil
+}
+
+func (u *userUsecaseImpl) FindAllUsers(ctx context.Context) ([]*model.User,error) {
+	log := logrus.WithField("ctx", ctx)
+	users, err := u.userRepository.FindAll(ctx)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+
+	return users, err
 }

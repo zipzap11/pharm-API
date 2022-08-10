@@ -25,3 +25,14 @@ func (u *categoryUsecaseImpl) GetAllCategories(ctx context.Context) ([]*model.Ca
 	}
 	return result, nil
 }
+
+func (u *categoryUsecaseImpl) Create(ctx context.Context, c *model.Category) error {
+	if err := u.categoryRepository.Create(ctx, c); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx":      ctx,
+			"category": c,
+		}).Error(err)
+		return err
+	}
+	return nil
+}

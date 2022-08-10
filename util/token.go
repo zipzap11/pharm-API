@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,18 +16,23 @@ var (
 type Payload struct {
 	ID        uuid.UUID `json:"id"`
 	UserID    int64     `json:"user_id"`
+	Role      int       `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
 func (p *Payload) Valid() error {
+	fmt.Println("expired at = ", p.ExpiredAt)
 	if time.Now().After(p.ExpiredAt) {
 		return ErrExpiredToken
 	}
 	return nil
 }
 
-func NewPayload(userID int64, duration time.Duration) (*Payload, error) {
+func NewPayload(userID int64, role int, duration time.Duration) (*Payload, error) {
+	fmt.Println("time now = ", time.Now())
+	fmt.Println("add = ", time.Now().Add(duration))
+	fmt.Println("duration = ", duration)
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return nil, err
@@ -34,6 +40,7 @@ func NewPayload(userID int64, duration time.Duration) (*Payload, error) {
 	payload := &Payload{
 		ID:        id,
 		UserID:    userID,
+		Role:      role,
 		CreatedAt: time.Now(),
 		ExpiredAt: time.Now().Add(duration),
 	}
@@ -41,6 +48,6 @@ func NewPayload(userID int64, duration time.Duration) (*Payload, error) {
 }
 
 type TokenProvider interface {
-	CreateToken(UserID int64, duration time.Duration) (string, *Payload, error)
+	CreateToken(UserID int64, role int, duration time.Duration) (string, *Payload, error)
 	VerifyToken(token string) (*Payload, error)
 }

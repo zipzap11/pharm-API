@@ -2,18 +2,18 @@ package model
 
 func ModelList() []interface{} {
 	return []interface{}{
-		CartItem{},
-		Cart{},
-		Category{},
 		PaymentMethod{},
+		Cart{},
+		CartItem{},
+		Category{},
+		User{},
 		Product{},
 		Transaction{},
 		TransactionItem{},
-		User{},
 		Session{},
-		Shipping{},
-		Province{},
 		State{},
+		Province{},
 		Address{},
+		Shipping{},
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 
@@ -57,10 +58,10 @@ type ResponseStateModel struct {
 }
 
 type RequestCostModel struct {
-	Origin      string `json:"origin"`
-	Destination string `json:"destination"`
-	Weight      float64  `json:"weight"`
-	Courier     string `json:"courier"`
+	Origin      string  `json:"origin"`
+	Destination string  `json:"destination"`
+	Weight      float64 `json:"weight"`
+	Courier     string  `json:"courier"`
 }
 
 type ResponseCostModel struct {
@@ -155,4 +156,21 @@ func (r *shippingRepositoryImpl) CreateShipping(ctx context.Context, tx *gorm.DB
 	}
 
 	return int64(shipping.ID), nil
+}
+
+func (u *shippingRepositoryImpl) FindByID(ctx context.Context, id int64) (*model.Shipping, error) {
+	log := logrus.WithFields(logrus.Fields{
+		"ctx": ctx,
+		"id":  id,
+	})
+	var shipping model.Shipping
+	if err := u.db.Preload("Address").Preload("Address.Province").Preload("Address.State").First(&shipping, id).Error; err != nil {
+		if errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil, nil
+		}
+		log.Error(err)
+		return nil, err
+	}
+
+	return &shipping, nil
 }

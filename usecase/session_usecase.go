@@ -50,13 +50,13 @@ func (u *SessionUsecaseImpl) RefreshSession(ctx context.Context, token string) (
 		return "", "", ErrMissmatchedToken
 	}
 
-	accessToken, _, err := u.tokenProvider.CreateToken(session.UserID, config.GetAccessTokenDuration())
+	accessToken, _, err := u.tokenProvider.CreateToken(session.UserID, int(session.Role), config.GetAccessTokenDuration())
 	if err != nil {
 		log.WithField("session", session).Error(err)
 		return "", "", err
 	}
 
-	refreshToken, refreshPayload, err := u.tokenProvider.CreateToken(session.UserID, config.GetRefreshTokenDuration())
+	refreshToken, refreshPayload, err := u.tokenProvider.CreateToken(session.UserID, int(session.Role), config.GetRefreshTokenDuration())
 	if err != nil {
 		log.WithField("session", session).Error(err)
 		return "", "", err

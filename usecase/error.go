@@ -15,4 +15,5 @@ var (
 	ErrCreateTransaction       = errors.New("failed to create transaction")
 	ErrAddressNameAlreadyExist = errors.New("address name already exist")
 	ErrInvalidAddress          = errors.New("address is invalid")
+	ErrEmailAlreadyUsed        = errors.New("email already used")
 )

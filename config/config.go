@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -13,6 +14,7 @@ func init() {
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("../")
 	viper.AddConfigPath("../../")
+	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -28,57 +30,113 @@ func init() {
 }
 
 func GetDBHost() string {
-	return viper.GetString("postgres.host")
+	cfg := viper.GetString("postgres.host")
+	if cfg == "" {
+		return os.Getenv("postgres.host")
+	}
+	return cfg
 }
 
 func GetDBPort() string {
-	return viper.GetString("postgres.port")
+	cfg := viper.GetString("postgres.port")
+	if cfg == "" {
+		return os.Getenv("postgres.port")
+	}
+	return cfg
 }
 
 func GetDBName() string {
-	return viper.GetString("postgres.database")
+	cfg := viper.GetString("postgres.database")
+	if cfg == "" {
+		return os.Getenv("postgres.database")
+	}
+	return cfg
 }
 
 func GetDBPassword() string {
-	return viper.GetString("postgres.password")
+	cfg := viper.GetString("postgres.password")
+	if cfg == "" {
+		return os.Getenv("postgres.password")
+	}
+	return cfg
 }
 
 func GetDBUser() string {
-	return viper.GetString("postgres.user")
+	cfg := viper.GetString("postgres.user")
+	if cfg == "" {
+		return os.Getenv("postgres.user")
+	}
+	return cfg
 }
 
 func GetRefreshTokenDuration() time.Duration {
-	return viper.GetDuration("session.refresh_token_duration")
+	cfg := viper.GetDuration("session.refresh_token_duration")
+	if cfg < 0 {
+		return time.Minute * 10
+	}
+	return cfg
 }
 
 func GetAccessTokenDuration() time.Duration {
-	return viper.GetDuration("session.access_token_duration")
+	cfg := viper.GetDuration("session.access_token_duration")
+	if cfg < 0 {
+		return time.Hour * 96
+	}
+	return cfg
 }
 
 func GetSymmetricKey() string {
-	return viper.GetString("session.symmetric_key")
+	cfg := viper.GetString("session.symmetric_key")
+	if cfg == "" {
+		return os.Getenv("session.symmetric_key")
+	}
+	return cfg
 }
 
 func GetProvinceAPIUrl() string {
-	return viper.GetString("rajaongkir.province")
+	cfg := viper.GetString("rajaongkir.province")
+	if cfg == "" {
+		return os.Getenv("rajaongkir.province")
+	}
+	return cfg
 }
 
 func GetStateAPIUrl() string {
-	return viper.GetString("rajaongkir.state")
+	cfg := viper.GetString("rajaongkir.state")
+	if cfg == "" {
+		return os.Getenv("rajaongkir.state")
+	}
+	return cfg
 }
 
 func GetROAPIKey() string {
-	return viper.GetString("rajaongkir.key")
+	cfg := viper.GetString("rajaongkir.key")
+	if cfg == "" {
+		return os.Getenv("rajaongkir.key")
+	}
+	return cfg
 }
 
 func GetROPriceURL() string {
-	return viper.GetString("rajaongkir.price")
+	cfg := viper.GetString("rajaongkir.price")
+	if cfg == "" {
+		return os.Getenv("rajaongkir.price")
+	}
+	return cfg
 }
 
 func GetShippingOrigin() string {
-	return viper.GetString("rajaongkir.origin")
+	cfg := viper.GetString("rajaongkir.origin")
+	if cfg == "" {
+		return os.Getenv("rajaongkir.origin")
+	}
+	return cfg
 }
 
 func GetMidtransAPIKey() string {
-	return viper.GetString("midtrans.sandbox_apikey")
+	cfg := viper.GetString("midtrans.sandbox_apikey")
+	if cfg == "" {
+		return os.Getenv("midtrans.sandbox_apikey")
+	}
+	return cfg
 }

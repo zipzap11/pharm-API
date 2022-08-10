@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 
 	"github.com/sirupsen/logrus"
 	"github.com/zipzap11/pharm-API/model"
@@ -111,4 +112,39 @@ func (r *transactionRepositoryImpl) UpdateTransactionPaymentURL(ctx context.Cont
 	}
 
 	return nil
+}
+
+func (r *transactionRepositoryImpl) FindAll(ctx context.Context) ([]*model.Transaction, error) {
+	log := logrus.WithField("ctx", ctx)
+	var transactions []*model.Transaction
+	if err := r.db.Preload("User").Preload("PaymentMethod").Find(&transactions).Error; err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	return transactions, nil
+}
+
+func (r *transactionRepositoryImpl) FindByID(ctx context.Context, id int64) (*model.Transaction, error) {
+	log := logrus.WithFields(logrus.Fields{
+		"ctx": ctx,
+		"id":  id,
+	})
+
+	var transaction model.Transaction
+	if err := r.db.Debug().Preload("Items").Preload("Items.Product").Preload("Shipping").Preload("User").First(&transaction, id).Error; err != nil {
+		if errors.Is(gorm.ErrRecordNotFound, err) {
+			return nil, nil
+		}
+		log.Error(err)
+		return nil, err
+	}
+
+	// items, err := r.transactionItemRepository.GetItemsByTransactionID(ctx, id)
+	// if err != nil {
+	// 	log.Error(err)
+	// 	return nil, err
+	// }
+	// transaction.Items = items
+
+	return &transaction, nil
 }

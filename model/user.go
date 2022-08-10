@@ -17,16 +17,21 @@ type User struct {
 	Email     string       `validate:"required,email" json:"email"`
 	Password  string       `validate:"required,min=6" json:"password"`
 	Phone     string       `json:"phone"`
+	Role      Role         `json:"role"`
 }
 
 type UserUsecase interface {
 	CreateUser(ctx context.Context, user *User) error
 	Login(ctx context.Context, email string, password string) (string, string, error)
 	FindByID(ctx context.Context, id int64) (*User, error)
+	CreateSuperUser(ctx context.Context, user *User) error
+	FindAllUsers(ctx context.Context) ([]*User, error)
 }
 
 type UserRepository interface {
 	CreateUser(ctx context.Context, tx *gorm.DB, user *User) (id int64, err error)
 	FindUserByEmail(ctx context.Context, email string) (*User, error)
 	FindUserByID(ctx context.Context, userID int64) (*User, error)
+	FindAll(ctx context.Context) ([]*User, error)
+	FindByID(ctx context.Context, id int64) (*User, error)
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -39,15 +41,15 @@ func main() {
 	sessionUsecase := usecase.NewSessionUsecase(sessionRepository, tokenProvider)
 	sessionController := controller.NewSessionController(sessionUsecase)
 
-	// product
-	productRepository := repository.NewProductRepository(db.DB)
-	productUsecase := usecase.NewProductUsecase(productRepository)
-	productController := controller.NewProductController(productUsecase)
-
 	// category
 	categoryRepository := repository.NewCategoryRepository(db.DB)
 	categoryUsecase := usecase.NewCategoryUsecase(categoryRepository)
 	categoryController := controller.NewCategoryController(categoryUsecase)
+
+	// product
+	productRepository := repository.NewProductRepository(db.DB)
+	productUsecase := usecase.NewProductUsecase(productRepository, categoryRepository)
+	productController := controller.NewProductController(productUsecase)
 
 	// cart-item
 	cartItemRepository := repository.NewCartItemRepository(db.DB)
@@ -92,14 +94,29 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method} uri=${uri} status=${status} latency=${latency_human} header=${header:Authorization}\n",
 	}))
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAccessControlExposeHeaders, echo.HeaderAuthorization},
+	}))
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			time.Sleep(time.Second * 1)
+			return next(c)
+		}
+	})
 	auth := e.Group("", customMiddleware.AuthPaseto(tokenProvider))
-
 	// path
 	e.GET("/products", productController.GetAllProducts)
 	e.GET("/products/:id", productController.FindById)
+	auth.POST("/products", productController.Create)
+	auth.PUT("/products", productController.UpdateStock)
+	auth.DELETE("/products/:id", productController.DeleteProduct)
 	e.GET("/categories", categoryController.GetAllCategories)
+	auth.POST("/categories", categoryController.CreateCategory)
+	auth.GET("/users", userController.FindUsers)
 	e.POST("/users", userController.CreateUser)
-	// e.GET("/users:id", userController.FindById)
+	//e.GET("/users:id", userController.FindById)
+	e.POST("/users/super", userController.CreateSuperUser)
 	e.POST("/auth/login", userController.Login)
 	e.POST("/auth/refresh", sessionController.RefreshSession)
 	e.GET("/auth/validate", sessionController.CheckSession)
@@ -117,6 +134,7 @@ func main() {
 	auth.POST("/transactions", transactionController.CreateTransaction)
 	e.POST("/transactions/callback", transactionController.HandleTransactionCallback)
 	auth.GET("/transactions", transactionController.GetTransactionByUserID)
+	auth.GET("/transactions/:id", transactionController.GetTransactionByID)
 
 	e.Start("localhost:8000")
 }

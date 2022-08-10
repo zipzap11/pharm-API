@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/labstack/gommon/log"
 	"github.com/zipzap11/pharm-API/config"
 	"github.com/zipzap11/pharm-API/model"
 
@@ -16,13 +17,15 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
-		config.GetDBHost(),
-		config.GetDBUser(),
-		config.GetDBPassword(),
-		config.GetDBName(),
-		config.GetDBPort(),
-	)
+	dsn := fmt.Sprintf("postgres://%s:%s@%s/%s", config.GetDBUser(), config.GetDBPassword(), config.GetDBHost(), config.GetDBName())
+	// dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s",
+	// 	config.GetDBHost(),
+	// 	config.GetDBUser(),
+	// 	config.GetDBPassword(),
+	// 	config.GetDBName(),
+	// 	config.GetDBPort(),
+	// )
+	log.Info("dsn = ", dsn)
 	sqlDB, err := sql.Open("pgx", dsn)
 	if err != nil {
 		logrus.Fatal(err)

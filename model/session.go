@@ -9,10 +9,18 @@ import (
 
 const AuthorizationPayloadKey = "authorization_payload"
 
+type Role int
+
+var (
+	RoleUser  Role = 1
+	RoleAdmin Role = 0
+)
+
 type Session struct {
 	ID           uuid.UUID
 	RefreshToken string
 	UserID       int64
+	Role         Role
 	IsBlocked    bool
 	CreatedAt    time.Time
 	ExpiredAt    time.Time

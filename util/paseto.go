@@ -24,8 +24,8 @@ func NewPasetoProvider(symmetricKey string) (TokenProvider, error) {
 	}, nil
 }
 
-func (p *PasetoProvider) CreateToken(userID int64, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(userID, duration)
+func (p *PasetoProvider) CreateToken(userID int64, role int, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(userID, role, duration)
 	if err != nil {
 		return "", nil, err
 	}
